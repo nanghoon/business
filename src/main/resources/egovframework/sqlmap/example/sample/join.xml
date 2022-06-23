@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+
+	<insert id="insertLoginformMember">
+		<![CDATA[
+			INSERT INTO user
+				(  id
+				  , pw
+				  , nickname
+				  , name
+				  , email
+				  , mail
+				  , info
+				  , grade
+				  , jdate
+					)
+			VALUES ( #id#
+				  , #pw#
+				  , #nickname#
+				  , #name#
+				  , #email#
+				  , #mail#
+				  , #info#
+				  , 1
+				  , now())
+		]]>
+	</insert>
+	<select id="checkID" resultClass="EgovMap">
+	        <![CDATA[
+	            SELECT *
+	            FROM user
+	            where id = #id#
+	        ]]>
+	</select>
+	<select id="checkNickname" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM user
+            where nickname = #nickname#
+        ]]>
+	</select>
+	<select id="checkEmail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM user
+            where email = #email#
+        ]]>
+	</select>
+	<select id="selectUserDetail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM user
+            where idx = #idx#
+        ]]>
+	</select>
+	<select id="selectUserList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM user
+            order by idx desc 
+            limit #first# , #record#
+        ]]>
+	</select>
+	<select id="selectUserListCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM user
+        ]]>
+	</select>
+	<update id="updateEditformMember">
+		<![CDATA[
+			UPDATE user
+			SET email=#email#
+				, mail = #mail#
+				, info = #info#
+		]]>
+       	<isNotEmpty property="pw">
+       		, pw = #pw#
+       	</isNotEmpty>
+		<![CDATA[
+			WHERE idx=#idx#
+		]]>
+	</update>
+	
+	<delete id="deleteUser">
+			<![CDATA[
+				DELETE FROM user
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	
+	<delete id="deleteUserReple">
+			<![CDATA[
+				DELETE FROM linkreple
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	
+	<delete id="deleteUserQna">
+			<![CDATA[
+				DELETE FROM board
+				WHERE idx=#idx#
+			]]>
+	</delete>
+</sqlMap>

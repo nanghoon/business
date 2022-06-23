@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+
+	<select id="checkUserLogin" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM user
+            where id = #id# and pw = #pw#
+        ]]>
+	</select>
+
+	<select id="selectVisitByDate" resultClass="int">
+        <![CDATA[
+            SELECT ifnull(sum(visit),0)
+            FROM visit
+            where vdate = #date#
+        ]]>
+	</select>
+	<select id="selectVisitByDateMap" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM visit
+            where vdate = #date#
+        ]]>
+	</select>
+	<insert id="insertVisitToday">
+		<![CDATA[
+			INSERT INTO visit
+				( visit
+				  , vdate
+				  )
+			VALUES ( 1
+				  , now())
+		]]>
+	</insert>
+	<update id="updateVisitToday">
+		<![CDATA[
+			UPDATE visit
+			SET visit= visit+1
+			WHERE vdate=date(now())
+		]]>
+	</update>
+	<select id="selectMaxVisit" resultClass="int">
+        <![CDATA[
+            SELECT ifnull(max(visit),0) visit
+            FROM visit
+        ]]>
+	</select>
+	<select id="selectSumVisit" resultClass="int">
+        <![CDATA[
+            SELECT ifnull(sum(visit),0) visit
+            FROM visit
+        ]]>
+	</select>
+	<select id="selectAllBoardCnt" resultClass="EgovMap">
+        <![CDATA[
+			select (link + board) cnt
+			from (
+				select count(*) link  , (select count(*) from board) board
+				from link 
+			) A
+        ]]>
+	</select>
+	<select id="selectAlluserCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM user
+        ]]>
+	</select>
+	<select id="selectAllrepleCnt" resultClass="EgovMap">
+        <![CDATA[
+            select (linkreple + boardreple) cnt
+			from (
+				select count(*) linkreple  , (select count(*) from boardreple) boardreple
+				from linkreple 
+			) A
+        ]]>
+	</select>
+</sqlMap>

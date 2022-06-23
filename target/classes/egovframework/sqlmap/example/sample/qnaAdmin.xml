@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	<select id="selectqnaAdminList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board
+            where category = #category#
+            order by idx desc
+            limit #first# , #record#
+        ]]>
+	</select>
+	<select id="selectqnaAdminListCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM board
+            where category = #category#
+        ]]>
+	</select>
+	<select id="selectQnaAdminDetail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board
+            WHERE idx = #idx#
+        ]]>
+	</select>
+	<update id="updateQnaAdmin">
+		<![CDATA[
+			UPDATE board
+			SET category=#category#
+					, title=#title#
+					, text=#text#
+					, link1=#link1#
+					, link2=#link2#
+					, bdate = now()
+				WHERE idx=#idx#
+		]]>
+	</update>
+	
+	<delete id="deleteQnaAdmin">
+			<![CDATA[
+				DELETE FROM board
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	
+
+</sqlMap>

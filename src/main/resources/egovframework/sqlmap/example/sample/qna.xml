@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	
+	<select id="selectQnaList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT * , (select nickname from user where idx = bidx) nickname
+            FROM board
+            where category != 'notice'
+        ]]>
+        	<isNotEmpty property="category">
+        		and category = #category#
+        	</isNotEmpty>
+        	<isNotEmpty property="search">
+        		and title like concat('%' , #search# , '%')
+        	</isNotEmpty>
+        <![CDATA[
+            
+            order by idx desc 
+            limit #first# , #record#
+        ]]>
+	</select>
+	<select id="QnaListCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM board
+            where category != 'notice'
+        ]]>
+        	<isNotEmpty property="category">
+        		and category = #category#
+        	</isNotEmpty>
+        	<isNotEmpty property="search">
+        		and title like concat('%' , #search# , '%')
+        	</isNotEmpty>
+	</select>
+	<insert id="insertQnaMember">
+			<![CDATA[
+				INSERT INTO board
+					( title
+					  , text
+					  ,category
+					  , view
+					  , bidx
+					  , bdate
+					]]>
+					<isNotEmpty property="link1">, link1</isNotEmpty>
+					<isNotEmpty property="link2">, link2</isNotEmpty>
+					<![CDATA[
+					)
+				VALUES ( #title#
+					  , #text#
+					  , #category#
+					  , 0
+					  , #useridx#
+					  , now()
+					]]>
+					<isNotEmpty property="link1">, #link1#</isNotEmpty>
+					<isNotEmpty property="link2">, #link2#</isNotEmpty>
+					<![CDATA[
+					  )
+					  
+			]]>
+	</insert>
+	<select id="selectQnaMemberDetail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT * , (select nickname from user where idx = bidx) nickname
+            FROM board
+            WHERE idx = #idx#
+        ]]>
+	</select>
+	
+	<delete id="deleteQna">
+			<![CDATA[
+				DELETE FROM board
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	<update id="updateQnaMember">
+		<![CDATA[
+			UPDATE board
+			SET category=#category#
+				, title=#title#
+				, text=#text#
+				, link1=#link1#
+				, link2=#link2#
+				, bdate = now()
+			WHERE idx=#idx#
+		]]>
+	</update>
+	<insert id="insertQnaReple">
+		<![CDATA[
+			insert into boardReple (groupIdx , groupOrd , reple , ridx , rdate )
+				values (#idx# , (select * from (select ifnull(Max(groupOrd),0)+1 from boardReple where groupIdx = #idx# ) A) , 
+					#reple# , #ridx# , now()) 
+		]]>
+	</insert>
+	<select id="selectQnaRepleList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT * , if(ridx = -1 , '관리자' , (select nickname from user where idx = ridx) ) writer
+            FROM boardReple
+            where groupIdx =#idx#
+            order by idx desc
+        ]]>
+	</select>
+	
+	<delete id="deleteqnaReple">
+		<![CDATA[
+			DELETE FROM boardReple
+			WHERE idx=#idx#
+		]]>
+	</delete>
+	
+	<delete id="deleteQnaRepleByGroupIdx">
+		<![CDATA[
+			DELETE FROM boardReple
+			WHERE groupIdx=#idx#
+		]]>
+	</delete>
+</sqlMap>

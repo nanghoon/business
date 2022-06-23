@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	
+	<select id="selectNoticeMemberList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board 
+            where category = 'notice'
+        ]]>
+        	<isNotEmpty property="search">
+        		and title like concat('%' , #search# , '%')
+        	</isNotEmpty>
+        	<isEmpty property="orderKind">
+        		order by idx desc
+        	</isEmpty>
+        	<isNotEmpty property="orderKind">
+        		<isEqual property="orderKind" compareValue="old">
+        			order by idx
+        		</isEqual>
+        		<isEqual property="orderKind" compareValue="view">
+        			order by view desc
+        		</isEqual>
+        	</isNotEmpty>
+        <![CDATA[
+            limit #first# , #record#
+        ]]>
+	</select>
+	<select id="selectNoticeMemberListCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM board
+            where category = 'notice'
+        ]]>
+        	<isNotEmpty property="search">
+        		and title like concat('%' , #search# , '%')
+        	</isNotEmpty>
+	</select>
+	<select id="selectNoticeDetail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board
+            WHERE idx = #idx#
+        ]]>
+	</select>
+	<insert id="insertNoticeMember">
+			<![CDATA[
+				INSERT INTO board
+					( title
+					  , text
+					  ,category
+					  , view
+					  , top
+					  , rightYn
+					  , bidx
+					  , bdate
+						)
+				VALUES ( #title#
+					  , #text#
+					  , 'notice'
+					  , 0
+					  , #top#
+					  , #right#
+					  , -1
+					  , now())
+			]]>
+	</insert>
+	<update id="noticeUpdate">
+		<![CDATA[
+			UPDATE board
+			SET title=#title#
+				, text=#text#
+				, top=#top#
+				, rightYn=#rightYn#
+				, view=#view#
+			WHERE idx=#idx#
+		]]>
+	</update>
+	
+	<delete id="deleteNotice">
+			<![CDATA[
+				DELETE FROM board
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	<!-- 상단 공지 고정  -->
+	<select id="selectTopNoticeList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board
+            where category = 'notice' 
+            	and top = 'Y'
+        ]]>
+        	<isNotEmpty property="search">
+        		and title like concat('%' , #search# , '%')
+        	</isNotEmpty>
+        	<isEmpty property="orderKind">
+        		order by idx desc
+        	</isEmpty>
+        	<isNotEmpty property="orderKind">
+        		<isEqual property="orderKind" compareValue="old">
+        			order by idx
+        		</isEqual>
+        		<isEqual property="orderKind" compareValue="view">
+        			order by view desc
+        		</isEqual>
+        	</isNotEmpty>
+        <![CDATA[
+            limit 3
+        ]]>
+	</select>
+	<update id="boardViewCnt">
+		<![CDATA[
+			UPDATE board
+			SET view=view+1
+			WHERE idx=#idx#
+		]]>
+	</update>
+	<select id="noticeRightlimit_1" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM board
+            where category = 'notice' and rightYn = 'Y'
+            order by idx desc
+            limit 1
+        ]]>
+	</select>
+</sqlMap>

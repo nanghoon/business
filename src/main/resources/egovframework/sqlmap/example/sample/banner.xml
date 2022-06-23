@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	
+	<!-- 상단배너 9개 -->
+	<select id="selectTopBannerByOrd" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM banner
+            where location = 0 
+            	and ordNum = #ord#
+            order by ordNum
+        ]]>
+	</select>
+	<!-- 우측배너 4개 -->
+	<select id="selectRightBannerByOrd" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM banner
+            where location = 1
+            	and ordNum = #ord# 
+            order by ordNum 
+        ]]>
+	</select>
+	<insert id="insertBanner">
+		<![CDATA[
+			INSERT INTO banner
+				( imgNm
+				  , url
+				  , location
+				  , ordNum
+				  )
+			VALUES ( #imgNm#
+				  , #url#
+				  , #location#
+				  , #ordNum#
+				  )
+		]]>
+	</insert>
+	<select id="selectBannerLimit1" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM banner
+            where location = #location# and ordNum = #ordNum#
+        ]]>
+	</select>
+	<update id="updateBanner">
+		<![CDATA[
+			UPDATE banner
+			SET imgNm=#imgNm#
+				, url=#url#
+			WHERE location = #location# and ordNum = #ordNum#
+		]]>
+	</update> 
+	<select id="selectBannerList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM banner
+            where location = #location# 
+            order by ordNum 
+        ]]>
+	</select>
+	<select id="selectRightBannerList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM banner
+            where location = 1 and ordNum <> 1
+            order by ordNum 
+        ]]>
+	</select>
+	
+</sqlMap>	

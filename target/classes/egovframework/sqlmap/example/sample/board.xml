@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="egovframework.example.sample.service.SampleDefaultVO"/>
+	<!-- 링크게시판 list  -->
+	<select id="linkList" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            where 1 =1
+        ]]>
+        	<isNotEmpty property="category">
+        		and category = #category#
+        	</isNotEmpty>
+        	<isNotEmpty property="search">
+	        	<isEqual property="kind" compareValue="all">
+	        		and (title like concat('%' , #search# , '%') or 	text like concat('%' , #search# , '%'))
+	        	</isEqual>
+	        	<isNotEqual property="kind" compareValue="all">
+	        		and $kind$ like concat('%' , #search# , '%')
+	        	</isNotEqual>
+        	</isNotEmpty>
+        	<isEmpty property="orderKind">
+        		order by idx desc
+        	</isEmpty>
+        	<isNotEmpty property="orderKind">
+        		<isEqual property="orderKind" compareValue="old">
+        			order by idx
+        		</isEqual>
+        		<isEqual property="orderKind" compareValue="view">
+        			order by view desc
+        		</isEqual>
+        	</isNotEmpty>
+        <![CDATA[
+            limit #first# , #record#
+        ]]>
+	</select>
+	<select id="linkListCnt" resultClass="int">
+        <![CDATA[
+            SELECT count(*)
+            FROM link
+            where 1=1
+        ]]>
+        	<isNotEmpty property="category">
+        		and category = #category#
+        	</isNotEmpty>
+        	<isNotEmpty property="search">
+	        	<isEqual property="kind" compareValue="all">
+	        		and (title like concat('%' , #search# , '%') or 	text like concat('%' , #search# , '%'))
+	        	</isEqual>
+	        	<isNotEqual property="kind" compareValue="all">
+	        		and $kind$ like concat('%' , #search# , '%')
+	        	</isNotEqual>
+        	</isNotEmpty>
+	</select>
+	<select id="linkListAll" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            where category = #category#
+            order by idx desc
+        ]]>
+	</select>
+	<!-- 링크게시판 insert -->
+	<insert id="insertLink">
+		<![CDATA[
+			INSERT INTO link
+				( category
+				  , logo
+				  , title
+				  , text
+				  , view
+				  , link
+				  , click
+				  , kind
+				  , ldate
+				  , udate)
+			VALUES ( #category#
+				  , #logo#
+				  , #title#
+				  , #text#
+				  , 0
+				  , #link#
+				  , 0
+				  , #kind#
+				  , now()
+				  , now())
+		]]>
+		<selectKey keyProperty="idx" resultClass="int">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	<!-- 태그가 존재하는지 체크  -->
+	<select id="tagChk" resultClass="egovMap">
+		select *
+		from tag
+		where tag=#tag#
+	</select>
+	<!-- 태그 등록 -->
+	<insert id="insertTag">
+   		insert into tag
+   			(tag)
+		values
+			(#tag#)
+   	</insert>
+   	<!-- 태그 마지막 번호 idx 추출 -->
+   	<select id="tagLastNum" resultClass="int">
+   		select idx
+   		from tag
+   		order by idx desc
+   		limit 1
+   	</select>
+   	<!-- 해당 태그의 idx 추출 -->
+   	<select id="tagNum" resultClass="int">
+		select idx
+		from tag
+		where tag=#tag#
+	</select>
+	<!-- 태그 fk 테이블  -->
+	<select id="tagFkChk" resultClass="egovMap">
+   		select * from tagfk
+		where lidx = #lidx# and tidx = #tidx#
+   	</select>
+   	<!-- 태그 fk 테이블 등록  -->
+   	<insert id="tagFk">
+   		insert into tagFk
+   			(lidx, tidx)
+		values
+			(#lidx#, #tidx#)
+   	</insert>
+   	<select id="linkDetail" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            where idx = #idx#
+        ]]>
+	</select>
+   	<select id="tagListByLidx" resultClass="EgovMap">
+        <![CDATA[
+			select * , (select tag from tag where idx = tidx) tag
+			from tagfk
+			where lidx = #idx#
+        ]]>
+	</select>
+   	<select id="selectTagSearchList" resultClass="EgovMap">
+        <![CDATA[
+			select * 
+			from link 
+			where idx in (
+				select lidx
+				from tagfk
+				where tidx = #idx#
+			)
+			order by idx desc
+			limit #first# , #record#
+        ]]>
+	</select>
+   	<select id="selectTagSearchListCnt" resultClass="int">
+        <![CDATA[
+			select count(*) 
+			from link 
+			where idx in (
+				select lidx
+				from tagfk
+				where tidx = #idx#
+			)
+        ]]>
+	</select>
+	<!-- 링크게시판 수정 -->
+	<update id="updateLink">
+		<![CDATA[
+			UPDATE link
+			SET title=#title#
+				, text=#text#
+				, link=#link#
+				, kind=#kind#
+				, view=#view#
+				, click=#click#
+				, udate = now()
+		]]>
+			<isNotEmpty property="logo">
+				, logo = #logo#
+			</isNotEmpty>
+		<![CDATA[
+			WHERE idx=#idx#
+		]]>
+	</update>
+	<delete id="deleteTagFk">
+		<![CDATA[
+			DELETE FROM tagfk
+			WHERE lidx=#idx#
+		]]>
+	</delete>
+
+	<delete id="deleteLink">
+			<![CDATA[
+				DELETE FROM link
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	<update id="linkViewCnt">
+		<![CDATA[
+			UPDATE link
+			SET view= view+1
+			WHERE idx=#idx#
+		]]>
+	</update>
+	<!-- 최신 업데이트 10건 (링크게시판) -->
+	<select id="selectRecentUpdateLink" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            order by udate desc
+            limit 10
+        ]]>
+	</select>
+	<!-- 신규사이트 10건(링크게시판) - 7일이내 -->
+	<select id="selectNewLink" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            where date(ldate) > date(date_sub(now(), interval 7 day)) 
+            order by ldate desc
+            limit 10
+        ]]>
+	</select>
+	<select id="selectGuideByKind" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM guide
+            where kind = #kind#
+        ]]>
+	</select>
+	<update id="updateGuideText">
+		<![CDATA[
+			UPDATE guide
+			SET text=#text#
+			WHERE idx=#idx#
+		]]>
+	</update>
+	<select id="selectlinkRepleList" resultClass="EgovMap">
+	      <![CDATA[
+	          SELECT * , if(ridx = -1 , '관리자' , (select nickname from user where idx = ridx) ) writer
+	          FROM linkreple
+	          where groupIdx =#idx#
+	          order by idx desc
+	      ]]>
+	</select>
+	<insert id="insertLinkReple">
+		<![CDATA[
+			insert into linkreple (groupIdx , groupOrd , reple , ridx , rdate )
+				values (#idx# , (select * from (select ifnull(Max(groupOrd),0)+1 from boardReple where groupIdx = #idx# ) A) , 
+					#reple# , #ridx# , now()) 
+		]]>
+	</insert>
+	<update id="updateLinkClick">
+		<![CDATA[
+			UPDATE link
+			SET click = click+1
+			WHERE idx=#idx#
+		]]>
+	</update>
+	
+	<delete id="deleteReple">
+			<![CDATA[
+				DELETE FROM linkreple
+				WHERE idx=#idx#
+			]]>
+	</delete>
+	
+	<delete id="deletelinkRepleByGroupIdx">
+			<![CDATA[
+				DELETE FROM linkreple
+				WHERE groupIdx=#idx#
+			]]>
+	</delete>
+	<select id="selectLinkBoardLimit18" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM link
+            where category = #category#
+            order by udate desc
+            limit 18
+        ]]>
+	</select>
+	<select id="checkScrap" resultClass="EgovMap">
+        <![CDATA[
+            SELECT *
+            FROM scrap
+            where stable = #stable# and sidx = #sidx# and midx = #midx#
+        ]]>
+	</select>
+	<insert id="insertScrap">
+		<![CDATA[
+			INSERT INTO scrap
+				( stable
+				  , sidx
+				  , midx
+				  , sdate)
+			VALUES ( #stable#
+				  , #sidx#
+				  , #midx#
+				  , now())
+		]]>
+	</insert>
+	<select id="selectMyScrapList" resultClass="EgovMap">
+        <![CDATA[
+            select * , 
+			if(stable = 'l' , (select category from link where idx = sidx ) , (select category  from board where idx = sidx ) ) category ,
+			if(stable = 'l' , (select title from link where idx = sidx ) , (select title  from board where idx = sidx ) ) title
+			from scrap 
+			where midx = #idx#
+			order by idx desc 
+			limit #first# , #record#
+        ]]>
+	</select>
+	<select id="selectMyScrapListCnt" resultClass="int">
+        <![CDATA[
+            select count(*) 
+			from scrap 
+			where midx = #idx#
+        ]]>
+	</select>	
+	<delete id="deletScrap">
+		<![CDATA[
+			DELETE FROM scrap
+			WHERE idx=#idx#
+		]]>
+	</delete>
+	
+	<!-- 탈퇴한 유저가 작성한 qna글 삭제  -->
+	<delete id="deleteBoardUser">
+		<![CDATA[
+			DELETE FROM board
+			WHERE bidx=#idx#
+		]]>
+	</delete>
+	
+	<delete id="deleteLinkRepleUser">
+		<![CDATA[
+			DELETE FROM linkreple
+			WHERE ridx=#idx#
+		]]>
+	</delete>
+	
+	<delete id="deleteBoardRepleUser">
+			<![CDATA[
+				DELETE FROM boardreple
+				WHERE ridx=#idx#
+			]]>
+	</delete>
+	
+	<delete id="deleteScrapUser">
+			<![CDATA[
+				DELETE FROM scrap
+				WHERE midx=#idx#
+			]]>
+	</delete>
+</sqlMap>
